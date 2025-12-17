@@ -416,3 +416,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# .NET AppSettings 
+appsettings.Development.json
+
+# VS Code solution
+*.sln
+
