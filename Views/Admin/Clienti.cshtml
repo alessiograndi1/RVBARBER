@@ -1,0 +1,65 @@
+@model List<RVBARBER.Models.User>;
+
+@{
+    ViewData["Title"] = "Clienti";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Home" asp-controller="Admin" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                        <h4 class="mb-0"><i class="fas fa-users small"></i>&nbsp;&nbsp;Clienti</h4>
+                    </div>
+                    <hr>
+                    <div class="list-group">
+                        @foreach(var cliente in Model.OrderBy(x => x.Name).ThenBy(x => x.Surname))
+                        {
+                            <a class="list-group-item list-group-item-action py-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="mb-3"><i class="far fa-user small text-muted"></i>&nbsp;&nbsp;@cliente.Name @cliente.Surname</p>
+                                        <p class="mb-3 small"><i class="fas fa-at text-muted"></i>&nbsp;&nbsp;@cliente.Email</p>
+                                        <p class="mb-0 small"><i class="fas fa-phone text-muted"></i>&nbsp;&nbsp;@cliente.Phone</p>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+    </script>
+}

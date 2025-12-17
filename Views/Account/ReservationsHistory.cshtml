@@ -1,0 +1,122 @@
+@model List<RVBARBER.Models.Reservation>;
+
+@{
+    ViewData["Title"] = "Storico prenotazioni";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Profile" asp-controller="Account" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <h4 class="card-header pb-0">
+                        <i class="fas fa-history small"></i>&nbsp;&nbsp;Storico prenotazioni
+                    </h4>
+                    <hr>
+                    @if(Model != null && Model.Count > 0)
+                    {
+                        <div class="list-group">
+                            @foreach(var res in Model.OrderByDescending(x => x.DataAppuntamento))
+                            {
+                                var trattamenti = System.Text.Json.JsonSerializer.Deserialize<List<string>>(res.TrattamentiJson);
+                                
+                                <a class="list-group-item list-group-item-action py-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <p class="mb-3"><i class="fas fa-calendar-day small text-muted"></i>&nbsp;&nbsp;@res.DataAppuntamento.ToString("dd/MM/yyyy HH:mm")</p>
+                                            @foreach(var tratt in trattamenti!)
+                                            {
+                                                <p class="mb-1 d-block small"><i class="fas fa-cut text-muted"></i>&nbsp;&nbsp;@tratt</p>
+                                            }
+                                            <p class="mt-3 small mb-0"><i class="fas fa-stopwatch text-muted"></i>&nbsp;&nbsp;@res.Durata.ToString("0") min</p>
+                                            <span class="badge badge-accent my-3">@res.Barbiere</span>
+                                            <p class="mb-0"><span class="text-muted">Totale:</span> € @res.Totale.ToString("0.00")</p>
+                                        </div>
+                                        @if(res.DataAppuntamento > DateTime.Now)
+                                        {
+                                            <i class="far fa-trash-alt small text-danger" style="cursor: pointer;" 
+                                                data-bs-toggle="modal" data-bs-target="#modal-delete-reservation" onclick="deleteReservation(@res.Id)"></i>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center small text-muted">Non esistono prenotazioni</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conferma elimina prenotazione -->
+<div class="modal fade" id="modal-delete-reservation">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-4">
+                <form id="delete-reservation-form" data-url="@Url.Action("DeleteReservation", "Account")">
+                    <div class="mt-4">Confermi di voler cancellare la prenotazione?</div>
+                    <div class="text-end pb-3 mt-5">
+                        <button type="submit" class="btn btn-danger mb-3 py-2">Elimina</button>
+                        <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        function deleteReservation(id) {
+            $('#modal-delete-reservation').modal('show');
+            const formDelete = document.querySelector('#delete-reservation-form');
+            formDelete.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const submitBtn = formDelete.querySelector('button[type="submit"]');
+                submitBtn.setAttribute('disabled', '');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mx-5" role="status" aria-hidden="true"></span>';
+                $('#modal-delete-reservation').modal('hide');
+
+                const response = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+                if(response.ok) {
+                    window.location.href = window.location.href;
+                }
+            });
+        }
+    </script>
+}

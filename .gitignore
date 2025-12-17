@@ -423,3 +423,8 @@ appsettings.Development.json
 # VS Code solution
 *.sln
 
+# SQL Lite
+appdata.db
+appdata.db-shm
+appdata.db-wal
+

@@ -1,0 +1,369 @@
+@model List<RVBARBER.Models.OpeningHour>;
+
+@{
+    ViewData["Title"] = "Orari";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Home" asp-controller="Admin" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                        <h4 class="mb-0"><i class="far fa-clock small"></i>&nbsp;&nbsp;Orari di apertura</h4>
+                    </div>
+                    <hr>
+                    <div class="list-group">
+                        @foreach(var day in Model)
+                        {
+                            var culture = new System.Globalization.CultureInfo("it-IT");
+                            string dayName = culture.DateTimeFormat.GetDayName(day.DayOfWeek);
+
+                            string orarioMattina = string.Empty;
+                            if(day.MorningOpen != TimeSpan.Zero || day.MorningClose != TimeSpan.Zero)
+                            {
+                                orarioMattina = $"{day.MorningOpen.ToString(@"hh\:mm")} - {day.MorningClose.ToString(@"hh\:mm")}";
+                            }
+
+                            string orarioPomeriggio = string.Empty;
+                            if(day.AfternoonOpen != TimeSpan.Zero || day.AfternoonClose != TimeSpan.Zero)
+                            {
+                                orarioPomeriggio = $"{day.AfternoonOpen.ToString(@"hh\:mm")} - {day.AfternoonClose.ToString(@"hh\:mm")}";
+                            }
+                            
+                            bool closed = day.IsClosed;
+
+                            <a style="cursor: pointer;" class="list-group-item list-group-item-action py-3" 
+                                onclick="modificaOrario('@day.Id', '@dayName.ToString().ToUpper()', '@day.MorningOpen', '@day.MorningClose', '@day.AfternoonOpen', '@day.AfternoonClose', '@day.IsClosed')">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                        <strong>@dayName.ToString().ToUpper()</strong>
+                                    </p>
+                                    <div>
+                                        @if(closed) 
+                                        {
+                                            <p class="mb-0 text-muted small">Chiuso</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="font-bold mb-0">@orarioMattina</p>
+                                            <p class="font-bold mb-0">@orarioPomeriggio</p>
+                                        }
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modifica orario -->
+<div class="modal fade" id="modal-edit-orario">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5">
+                <form id="edit-orario-form" data-url="@Url.Action("ModificaOrario", "Admin")">
+                    <h4 class="my-4 font-bold"></h4>
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="is-closed">
+                        <label class="form-check-label" for="is-closed" id="is-closed-label">Chiuso</label>
+                    </div>
+                    <div class="orari mt-4">
+                        <strong>Mattina</strong>
+                        <div class="d-flex align-items-center mt-1">
+                            <select class="form-control open-morning-hour">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                            </select>
+                            <div class="mx-2">:</div>
+                            <select class="form-control open-morning-minute">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center my-3">
+                            <select class="form-control close-morning-hour">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                            </select>
+                            <div class="mx-2">:</div>
+                            <select class="form-control close-morning-minute">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                        </div>
+                        
+                        <strong>Pomeriggio</strong>
+                        <div class="d-flex align-items-center mt-1">
+                            <select class="form-control open-afternoon-hour">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                            </select>
+                            <div class="mx-2">:</div>
+                            <select class="form-control open-afternoon-minute">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mt-3">
+                            <select class="form-control close-afternoon-hour">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                            </select>
+                            <div class="mx-2">:</div>
+                            <select class="form-control close-afternoon-minute">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-end pb-3 mt-5">
+                        <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                        <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                    </div>
+                    <input type="hidden" name="dayId" value="">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        const formEditHour = document.getElementById('edit-orario-form');
+        const inputIsClosed = formEditHour.querySelector('.form-check-input');
+        const divOrari = formEditHour.querySelector('.orari');
+
+        const select_openMoorningHour = divOrari.querySelector('.open-morning-hour');
+        const select_openMoorningMinute = divOrari.querySelector('.open-morning-minute');
+        const select_closeMoorningHour = divOrari.querySelector('.close-morning-hour');
+        const select_closeMoorningMinute = divOrari.querySelector('.close-morning-minute');
+
+        const select_openAfternoonHour = divOrari.querySelector('.open-afternoon-hour');
+        const select_openAfternoonMinute = divOrari.querySelector('.open-afternoon-minute');
+        const select_closeAfternoonHour = divOrari.querySelector('.close-afternoon-hour');
+        const select_closeAfternoonMinute = divOrari.querySelector('.close-afternoon-minute');
+
+        let dayId = null;
+
+        function modificaOrario(id, giorno, aperturaMattina, chiusuraMattina, aperturaPomeriggio, chiusuraPomeriggio, chiuso) {
+            $('#modal-edit-orario').modal('show');
+            dayId = id;
+
+            if(chiuso === "True") {
+                inputIsClosed.setAttribute('checked', '');
+                divOrari.style.opacity = '0.5';
+                divOrari.style.pointerEvents = 'none';
+                divOrari.style.userSelect = 'none';
+            } else {
+                inputIsClosed.removeAttribute('checked');
+                divOrari.style.opacity = '1';
+                divOrari.style.pointerEvents = 'unset';
+                divOrari.style.userSelect = 'unset';
+            }
+
+            formEditHour.querySelector('h4').innerHTML = giorno;
+
+            if (aperturaMattina) {
+                const [hour, minute] = aperturaMattina.split(':');
+                select_openMoorningHour.value = hour;
+                select_openMoorningMinute.value = minute;
+            }
+            if (chiusuraMattina) {
+                const [hour, minute] = chiusuraMattina.split(':');
+                select_closeMoorningHour.value = hour;
+                select_closeMoorningMinute.value = minute;
+            }
+            if (aperturaPomeriggio) {
+                const [hour, minute] = aperturaPomeriggio.split(':');
+                select_openAfternoonHour.value = hour;
+                select_openAfternoonMinute.value = minute;
+            }
+            if (chiusuraPomeriggio) {
+                const [hour, minute] = chiusuraPomeriggio.split(':');
+                select_closeAfternoonHour.value = hour;
+                select_closeAfternoonMinute.value = minute;
+            }
+        }
+
+        inputIsClosed.addEventListener('change', (e) => {
+            if(e.target.checked) {
+                divOrari.style.opacity = '0.5';
+                divOrari.style.pointerEvents = 'none';
+                divOrari.style.userSelect = 'none';
+            } else {
+                divOrari.style.opacity = '1';
+                divOrari.style.pointerEvents = 'unset';
+                divOrari.style.userSelect = 'unset';
+            }
+        });
+
+        formEditHour.querySelector('button[type="submit"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            salvaOrario(dayId);
+        });
+
+        async function salvaOrario(id) {
+            const isClosed = inputIsClosed.checked;
+
+            const morningOpenHour = select_openMoorningHour.value;
+            const morningOpenMinute = select_openMoorningMinute.value;
+            const morningCloseHour = select_closeMoorningHour.value;
+            const morningCloseMinute = select_closeMoorningMinute.value;
+
+            const afternoonOpenHour = select_openAfternoonHour.value;
+            const afternoonOpenMinute = select_openAfternoonMinute.value;
+            const afternoonCloseHour = select_closeAfternoonHour.value;
+            const afternoonCloseMinute = select_closeAfternoonMinute.value;
+
+            const data = new FormData();
+            data.append("IsClosed", isClosed);
+            data.append("MorningOpen", `${morningOpenHour}:${morningOpenMinute}`);
+            data.append("MorningClose", `${morningCloseHour}:${morningCloseMinute}`);
+            data.append("AfternoonOpen", `${afternoonOpenHour}:${afternoonOpenMinute}`);
+            data.append("AfternoonClose", `${afternoonCloseHour}:${afternoonCloseMinute}`);
+            
+            const response = await fetch(`/admin/orari/${id}`, {
+                method: "PUT",
+                body: data
+            });
+
+            if (response.ok) {
+                $('#modal-edit-orario').modal('hide');
+                
+                window.location.href = window.location.href;
+            }
+        }
+
+
+    </script>
+}

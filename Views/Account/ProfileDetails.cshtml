@@ -1,0 +1,157 @@
+@model RVBARBER.ViewModels.UserViewModel;
+
+@{
+    ViewData["Title"] = "Dettagli personali";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+@if(Model != null)
+{
+    <div class="container px-4" id="content">
+        <div class="row">
+            <div class="col-auto">
+                <div class="card p-0">
+                    <div class="card-body p-2">
+                        <a asp-action="Profile" asp-controller="Account" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-4">
+                <div class="card p-0">
+                    <div class="card-body">
+                        <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                            <h4 class="mb-0"><i class="far fa-user-circle small"></i>&nbsp;&nbsp;Dettagli personali</h4>                            
+                            <i class="far fa-edit text-muted" style="cursor: pointer;" onclick="editProfile('@Model.Name', '@Model.Surname', '@Model.Email', '@Model.Phone')"></i>
+                        </div>
+                        <hr>
+                        <div class="list-group">
+                            <a class="list-group-item list-group-item-action py-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="mb-2 text-muted">Nome</p>
+                                        <strong>@Model.Name</strong>
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="list-group-item list-group-item-action py-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="mb-2 text-muted">Cognome</p>
+                                        <strong>@Model.Surname</strong>
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="list-group-item list-group-item-action py-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="mb-2 text-muted">Email</p>
+                                        <strong>@Model.Email</strong>
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="list-group-item list-group-item-action py-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="mb-2 text-muted">Telefono</p>
+                                        <strong>@Model.Phone</strong>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modifica profilo -->
+    <div class="modal fade" id="modal-edit-profile">
+        <div class="modal-dialog">
+            <div class="modal-content text-dark">
+                <div class="modal-header p-2">
+                    <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="px-5">
+                    <form id="edit-profile-form" data-url="@Url.Action("EditProfile", "Account")">
+                        <h4 class="my-4 font-bold">Modifica dati personali</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control login-form" name="name" placeholder="Nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control login-form" name="surname" placeholder="Cognome" required>
+                        </div>
+                         <div class="mb-3">
+                            <input type="tel" class="form-control login-form" name="phone" placeholder="Telefono" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control login-form" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="text-end pb-3 mt-5">
+                            <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                            <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container px-4" id="container-profile">
+        <div class="alert bg-danger pt-3 p-4 px-xl-5" id="alert-danger" style="display: none;">
+            <div class="text-end">
+                <i class="fas fa-times" style="cursor: pointer;" onclick="closeAlert(event)"></i>
+            </div>
+            <p style="font-size: 150%;"><i class="far fa-times-circle"></i>&nbsp;&nbsp;Si è verificato un errore</p>
+            <hr>
+            <p>Non è stato possibile recuperare i dettagli del profilo, ti invitiamo a riprovare più tardi.</p>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        function editProfile(name, surname, email, phone) {
+            $('#modal-edit-profile').modal('show');
+            const editForm = document.querySelector('#edit-profile-form');
+            editForm.querySelector('input[name="name"]').value = name;
+            editForm.querySelector('input[name="surname"]').value = surname;
+            editForm.querySelector('input[name="email"]').value = email;
+            editForm.querySelector('input[name="phone"]').value = phone;
+
+            editForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const submitBtn = editForm.querySelector('button[type="submit"]');
+                submitBtn.setAttribute('disabled', '');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mx-4" role="status" aria-hidden="true"></span>';
+                $('#modal-edit-profile').modal('hide');
+
+                const formData = new FormData(editForm);
+                const response = await fetch(editForm.dataset.url, { method: 'PUT', body: formData });
+                if(response.ok) {
+                    window.location.href = window.location.href;
+                }
+            });
+        }
+    </script>
+}

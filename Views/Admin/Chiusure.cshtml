@@ -1,0 +1,503 @@
+@model List<RVBARBER.Models.Closure>
+
+@{
+    ViewData["Title"] = "Chiusure";
+
+    var aperture = Model.Where(x => x.IsOpen == true);
+    var chiusure = Model.Where(x => x.IsOpen == false);
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+        input[type="date"] {
+            background-color: transparent;
+            color: black;
+        }
+        input[type="date"]:focus {
+            background-color: transparent;
+            color: black
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color-scheme: light;
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Home" asp-controller="Admin" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chiusure -->
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="mb-0">Chiusure</h4>
+                        </div>
+                        <i class="fas fa-plus text-muted" style="cursor: pointer;" onclick="nuovaChiusura(isOpen = false)"></i>
+                    </div>
+                    <hr>
+                    @if(chiusure.Count() > 0)
+                    {
+                        <div class="list-group">
+                        @foreach(var day in chiusure.OrderByDescending(x => x.StartDate).ThenByDescending(x => x.Date))
+                        {
+                            if(day.Date.HasValue)
+                            {
+                                var culture = new System.Globalization.CultureInfo("it-IT");
+                                string dayName = culture.DateTimeFormat.GetDayName(day.Date!.Value.DayOfWeek);
+
+                                string orarioMattina = string.Empty;
+                                if(day.MorningOpen.HasValue && day.MorningOpen != TimeSpan.Zero || day.MorningClose.HasValue && day.MorningClose != TimeSpan.Zero)
+                                {
+                                    orarioMattina = $"{day.MorningOpen!.Value.ToString(@"hh\:mm")} - {day.MorningClose!.Value.ToString(@"hh\:mm")}";
+                                }
+
+                                string orarioPomeriggio = string.Empty;
+                                if(day.AfternoonOpen.HasValue && day.AfternoonOpen != TimeSpan.Zero || day.AfternoonClose.HasValue && day.AfternoonClose != TimeSpan.Zero)
+                                {
+                                    orarioPomeriggio = $"{day.AfternoonOpen!.Value.ToString(@"hh\:mm")} - {day.AfternoonClose!.Value.ToString(@"hh\:mm")}";
+                                }
+
+                                <a class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                            <strong>@dayName.ToUpper() @day.Date.Value.ToString("dd/MM/yyyy")</strong>
+                                            <p class="text-muted mb-0">@orarioMattina</p>
+                                            <p class="text-muted mb-0">@orarioPomeriggio</p>
+                                        </div>
+                                        <div>
+                                            <span><i class="far fa-trash-alt small text-danger" style="cursor: pointer;" onclick="elimina(@day.Id)"></i></span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                            else if(day.StartDate.HasValue && day.EndDate.HasValue)
+                            {
+                                var culture = new System.Globalization.CultureInfo("it-IT");
+                                string startDayName = culture.DateTimeFormat.GetDayName(day.StartDate.Value.DayOfWeek);
+                                string endDayName = culture.DateTimeFormat.GetDayName(day.EndDate.Value.DayOfWeek);
+
+                                <a class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong class="d-block">da @startDayName.ToUpper() @day.StartDate.Value.ToString("dd/MM/yyyy")</strong>                                            
+                                            <strong class="d-block">a @endDayName.ToUpper() @day.EndDate.Value.ToString("dd/MM/yyyy")</strong>                                            
+                                        </div>
+                                        <div>
+                                            <span><i class="far fa-trash-alt small text-danger" style="cursor: pointer;" onclick="elimina(@day.Id)"></i></span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center small text-muted">Non esistono chiusure straordinarie</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Aperture --> 
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="mb-0">Aperture</h4>
+                        </div>
+                        <i class="fas fa-plus text-muted" style="cursor: pointer;" onclick="nuovaChiusura(isOpen = true)"></i>
+                    </div>
+                    <hr>
+                    @if(aperture.Count() > 0)
+                    {
+                        <div class="list-group">
+                        @foreach(var day in aperture.OrderByDescending(x => x.StartDate).ThenByDescending(x => x.Date))
+                        {
+                            if(day.Date.HasValue)
+                            {
+                                var culture = new System.Globalization.CultureInfo("it-IT");
+                                string dayName = culture.DateTimeFormat.GetDayName(day.Date!.Value.DayOfWeek);
+
+                                string orarioMattina = string.Empty;
+                                if(day.MorningOpen.HasValue && day.MorningOpen != TimeSpan.Zero || day.MorningClose.HasValue && day.MorningClose != TimeSpan.Zero)
+                                {
+                                    orarioMattina = $"{day.MorningOpen!.Value.ToString(@"hh\:mm")} - {day.MorningClose!.Value.ToString(@"hh\:mm")}";
+                                }
+
+                                string orarioPomeriggio = string.Empty;
+                                if(day.AfternoonOpen.HasValue && day.AfternoonOpen != TimeSpan.Zero || day.AfternoonClose.HasValue && day.AfternoonClose != TimeSpan.Zero)
+                                {
+                                    orarioPomeriggio = $"{day.AfternoonOpen!.Value.ToString(@"hh\:mm")} - {day.AfternoonClose!.Value.ToString(@"hh\:mm")}";
+                                }
+
+                                <a class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                            <strong>@dayName.ToUpper() @day.Date.Value.ToString("dd/MM/yyyy")</strong>
+                                            <p class="text-muted mb-0">@orarioMattina</p>
+                                            <p class="text-muted mb-0">@orarioPomeriggio</p>
+                                        </div>
+                                        <div>
+                                            <span><i class="far fa-trash-alt small text-danger" style="cursor: pointer;" onclick="elimina(@day.Id)"></i></span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                            else if(day.StartDate.HasValue && day.EndDate.HasValue)
+                            {
+                                var culture = new System.Globalization.CultureInfo("it-IT");
+                                string startDayName = culture.DateTimeFormat.GetDayName(day.StartDate.Value.DayOfWeek);
+                                string endDayName = culture.DateTimeFormat.GetDayName(day.EndDate.Value.DayOfWeek);
+
+                                <a class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong class="d-block">da @startDayName.ToUpper() @day.StartDate.Value.ToString("dd/MM/yyyy")</strong>                                            
+                                            <strong class="d-block">a @endDayName.ToUpper() @day.EndDate.Value.ToString("dd/MM/yyyy")</strong>
+                                        </div>
+                                        <div>
+                                            <span><i class="far fa-trash-alt small text-danger" style="cursor: pointer;" onclick="elimina(@day.Id)"></i></span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center small text-muted">Non esistono aperture straordinarie</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Aggiungi chiusura -->
+<div class="modal fade" id="modal-add-closure">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5">
+                <form id="add-closure-form" data-url="@Url.Action("AggiungiChiusura", "Admin")">
+                    <div class="chiusura-singola" style="display: none">
+                        <h4 class="my-4 font-bold"></h4>
+                        <div class="giorno mb-4">
+                            <strong><i class="far fa-calendar-alt"></i>&nbsp;&nbsp;Data</strong>
+                            <input type="date" class="form-control mt-3" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"/>
+                        </div>
+                        <strong><i class="far fa-clock"></i>&nbsp;&nbsp;Orari</strong>
+                        <div class="orari mt-3">
+                            <div class="small">Mattina</div>
+                            <div class="d-flex align-items-center mt-1">
+                                <select class="form-control open-morning-hour">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                                <div class="mx-2">:</div>
+                                <select class="form-control open-morning-minute">
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                            <div class="d-flex align-items-center my-3">
+                                <select class="form-control close-morning-hour">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                                <div class="mx-2">:</div>
+                                <select class="form-control close-morning-minute">
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                            
+                            <div class="small">Pomeriggio</div>
+                            <div class="d-flex align-items-center mt-1">
+                                <select class="form-control open-afternoon-hour">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                                <div class="mx-2">:</div>
+                                <select class="form-control open-afternoon-minute">
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                            <div class="d-flex align-items-center mt-3">
+                                <select class="form-control close-afternoon-hour">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                                <div class="mx-2">:</div>
+                                <select class="form-control close-afternoon-minute">
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="multiple mt-4">
+                            <span class="text-accent" style="cursor: pointer;" onclick="chiusuraMultipla()">Aggiungi più giorni</span>
+                        </div>
+                        <div class="text-end pb-3 mt-5">
+                            <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                            <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                        </div>
+                    </div>
+                    <div class="chiusura-multipla" style="display: none;">
+                        <h4 class="my-4 font-bold"></h4>
+                        <div class="my-4">
+                            <strong><i class="far fa-calendar-alt"></i>&nbsp;&nbsp;Da</strong>
+                            <input type="date" class="form-control mt-3" name="startDate" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"/>
+                        </div>
+                        <div class="giorno mb-4">
+                            <strong><i class="far fa-calendar-alt"></i>&nbsp;&nbsp;A</strong>
+                            <input type="date" class="form-control mt-3" name="endDate" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"/>
+                        </div>
+                        <div class="text-end pb-3 mt-5">
+                            <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                            <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        const form = document.getElementById('add-closure-form');
+        const divChiusuraSingola = form.querySelector('.chiusura-singola');
+        
+        const divGiorno = form.querySelector('.giorno');
+        const inputDate = divGiorno.querySelector('input[type="date"]');
+
+        const divOrari = form.querySelector('.orari');
+        const select_openMoorningHour = divOrari.querySelector('.open-morning-hour');
+        const select_openMoorningMinute = divOrari.querySelector('.open-morning-minute');
+        const select_closeMoorningHour = divOrari.querySelector('.close-morning-hour');
+        const select_closeMoorningMinute = divOrari.querySelector('.close-morning-minute');
+
+        const select_openAfternoonHour = divOrari.querySelector('.open-afternoon-hour');
+        const select_openAfternoonMinute = divOrari.querySelector('.open-afternoon-minute');
+        const select_closeAfternoonHour = divOrari.querySelector('.close-afternoon-hour');
+        const select_closeAfternoonMinute = divOrari.querySelector('.close-afternoon-minute');
+
+        const divChiusuraMultipla = form.querySelector('.chiusura-multipla');
+        const inputStartDate = divChiusuraMultipla.querySelector('input[name="startDate"]'); 
+        const inputEndDate = divChiusuraMultipla.querySelector('input[name="endDate"]');
+
+        let opening; 
+
+        function nuovaChiusura(isOpen) {
+            $('#modal-add-closure').modal('show');
+
+            opening = isOpen;
+
+            divChiusuraSingola.style.display = 'block';
+            
+            if(opening === false) {
+                divChiusuraSingola.querySelector('h4').textContent = 'Aggiungi chiusura';
+                divChiusuraMultipla.querySelector('h4').textContent = 'Aggiungi chiusura';
+            } else {
+                divChiusuraSingola.querySelector('h4').textContent = 'Aggiungi apertura';
+                divChiusuraMultipla.querySelector('h4').textContent = 'Aggiungi apertura'
+            }
+
+
+            divChiusuraMultipla.style.display = 'none';
+        }
+
+        function chiusuraMultipla() {
+            $('#modal-add-closure').modal('show');
+
+            divChiusuraSingola.style.display = 'none';
+            divChiusuraMultipla.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+
+            if(opening === true) {
+                formData.append("IsOpen", opening);
+            }
+            
+            if(divChiusuraSingola.style.display === 'block') {
+                const date = inputDate.value;
+
+                const morningOpenHour = select_openMoorningHour.value;
+                const morningOpenMinute = select_openMoorningMinute.value;
+                const morningCloseHour = select_closeMoorningHour.value;
+                const morningCloseMinute = select_closeMoorningMinute.value;
+
+                const afternoonOpenHour = select_openAfternoonHour.value;
+                const afternoonOpenMinute = select_openAfternoonMinute.value;
+                const afternoonCloseHour = select_closeAfternoonHour.value;
+                const afternoonCloseMinute = select_closeAfternoonMinute.value;
+
+                formData.append("Date", date);
+                formData.append("MorningOpen", `${morningOpenHour}:${morningOpenMinute}`);
+                formData.append("MorningClose", `${morningCloseHour}:${morningCloseMinute}`);
+                formData.append("AfternoonOpen", `${afternoonOpenHour}:${afternoonOpenMinute}`);
+                formData.append("AfternoonClose", `${afternoonCloseHour}:${afternoonCloseMinute}`);
+            } 
+            else {
+                const startDate = inputStartDate.value;
+                const endDate = inputEndDate.value;
+
+                formData.append("StartDate", startDate);
+                formData.append("EndDate", endDate);
+            }
+
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                $('#modal-add-closure').modal('hide');
+                
+                window.location.href = window.location.href;
+            }
+        });
+
+        async function elimina(id) {
+            const response = await fetch(`/admin/chiusure/${id}`, { method: "DELETE" });
+            if(response.ok) {
+                window.location.href = window.location.href;
+            }
+        }
+
+    </script>
+}

@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Profilo";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card p-0">
+                <div class="card-body">
+                    <h4 class="card-header"><i class="far fa-user text-accent"></i>&nbsp;&nbsp;Profilo</h4>
+                    <hr>
+                    <div class="list-group">
+                        <a asp-action="ProfileDetails" asp-controller="Account" class="list-group-item list-group-item-action py-4">
+                            <p class="mb-1 overflow-hidden text-nowrap text-truncate">
+                                <strong><i class="far fa-user-circle text-accent"></i>&nbsp;&nbsp;Dettagli personali</strong>
+                            </p>
+                            <div class="small text-muted d-flex justify-content-between">
+                                <div class="overflow-hidden text-nowrap text-truncate pr-3">Modifica i tuoi dati</div>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        <a asp-action="ReservationsHistory" asp-controller="Account" class="list-group-item list-group-item-action py-4">
+                            <p class="mb-1 overflow-hidden text-nowrap text-truncate">
+                                <strong><i class="fas fa-history text-accent"></i>&nbsp;&nbsp;Storico prenotazioni</strong>
+                            </p>
+                            <div class="small text-muted d-flex justify-content-between">
+                                <div class="overflow-hidden text-nowrap text-truncate pr-3">Consulta le prenotazioni già effettuate</div>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-0 mt-4">
+                <div class="card-body">
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action small py-3" style="cursor: pointer;" onclick="deleteProfile()">
+                            <p class="mb-0 overflow-hidden text-nowrap text-truncate text-danger">
+                                <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Elimina account
+                            </p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conferma elimina profilo -->
+<div class="modal fade" id="modal-delete-profile">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-4">
+                <form id="delete-profile-form" data-url="@Url.Action("DeleteProfile", "Account")">
+                    <div class="mt-4">Sei sicuro di voler <strong>eliminare</strong> il tuo account? Non potrai più accedere e di conseguenza effettuare prenotazioni</div>
+                    <div class="text-end pb-3 mt-5">
+                        <button type="submit" class="btn btn-danger mb-3 py-2">Elimina account</button>
+                        <button type="reset" class="btn btn-outline-dark mb-3 py-2" onclick="$('#modal-delete-profile').modal('hide');">Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        function deleteProfile() {
+            $('#modal-delete-profile').modal('show');
+            const formDelete = document.querySelector('#delete-profile-form');
+            formDelete.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const submitBtn = formDelete.querySelector('button[type="submit"]');
+                submitBtn.setAttribute('disabled', '');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mx-5" role="status" aria-hidden="true"></span>';
+                
+                const response = await fetch(formDelete.dataset.url, { method: 'DELETE' });
+                if(response.ok) {
+                    window.location.href = '/';
+                }
+            });
+        }
+    </script>
+}

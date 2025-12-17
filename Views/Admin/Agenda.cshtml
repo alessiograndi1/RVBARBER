@@ -1,0 +1,418 @@
+@model RVBARBER.ViewModels.AgendaViewModel
+
+@{
+    ViewData["Title"] = "Agenda";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 170px;
+
+            #agenda-header {
+                background-color: rgba(70, 70, 70, 0.3);
+                backdrop-filter: blur(5px);
+                position: fixed;
+                top: 85px;
+                left: 0;
+                width: 100%;
+                padding-top: 1.5rem;
+                padding-bottom: 1.5rem;
+                padding-left: 7rem;
+                padding-right: 7rem;
+                z-index: 1001;
+            }
+        }
+
+        @* .row>.col-12 {
+            border-bottom: 1px solid;
+            border-color: var(--bs-body-color);
+        }  *@
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 110px;
+
+                #agenda-header {
+                    position: fixed;
+                    top: 45px;
+                    left: 0;
+                    width: 100%;
+                    padding-top: 1.5rem;
+                    padding-bottom: 1.5rem;
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+            }
+        }
+
+        .slot {
+            display: flex;
+            align-items: center;
+            border-bottom: 5px solid #000;
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+            padding-left: 0.75rem;
+            padding-right: 1.25rem;
+        }
+        .slot.no-border {
+            border-bottom: none;
+        }
+
+        .prenotazione-color-0 { background-color: #ffadad; color: #000; }
+        .prenotazione-color-1 { background-color: #ffd6a5; color: #000; }
+        .prenotazione-color-2 { background-color: #fdffb6; color: #000; }
+        .prenotazione-color-3 { background-color: #caffbf; color: #000; }
+        .prenotazione-color-4 { background-color: #9bf6ff; color: #000; }
+        .prenotazione-color-5 { background-color: #a0c4ff; color: #000; }
+        .prenotazione-color-6 { background-color: #bdb2ff; color: #000; }
+        .prenotazione-color-7 { background-color: #ffc6ff; color: #000; }
+
+    </style>
+}
+
+@{
+    DateTime date = Model.Date;
+    DayOfWeek giorno = date.DayOfWeek;
+
+    string todayUrl = $"/admin/agenda?date={DateTime.Now.ToString("dd-MM-yyyy")}";
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto mb-3 p-0">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Home" asp-controller="Admin" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        <div id="agenda-header">
+            <div class="d-flex align-items-center justify-content-between">
+                <button class="btn text-light py-0 px-2" onclick="previousDate()">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div class="font-bold d-flex align-items-center justify-content-between">
+                    <p class="mb-0">
+                        <span class="pe-3">@date.ToString("dddd").ToUpper()</span>
+                        <input type="date" id="datepicker" style="background-color: transparent; border: none; padding-right: 0" value="@date.ToString("yyyy-MM-dd")" onchange="goToDate(this.value)" />
+                    </p>
+                </div>
+                <button class="btn text-light py-0 px-2" onclick="nextDate()">
+                    <i class="fas fa-angle-right"></i>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @if(Model.Slots!.Count > 0)
+            {
+                @for (int i = 0; i < Model.Slots.Count; i++)
+                {
+                    var slot = Model.Slots[i];
+                    var nextSlot = (i + 1 < Model.Slots.Count) ? Model.Slots[i + 1] : slot.AddMinutes(30);
+                    var durataSlot = (int)(nextSlot - slot).TotalMinutes;
+
+                    var currentPrenotazione = Model.Reservations!.Where(x => x.Barbiere == User.Identity!.Name)
+                        .FirstOrDefault(p => p.DataAppuntamento <= slot && p.DataAppuntamento.AddMinutes((double)p.Durata) > slot);
+
+                    var previousPrenotazione = (i > 0) ? Model.Reservations!.Where(x => x.Barbiere == User.Identity!.Name)
+                        .FirstOrDefault(p => p.DataAppuntamento <= Model.Slots[i - 1] && p.DataAppuntamento.AddMinutes((double)p.Durata) > Model.Slots[i - 1]) : null;
+
+                    var nextPrenotazione = (i + 1 < Model.Slots.Count) ? Model.Reservations!
+                        .FirstOrDefault(p => p.DataAppuntamento <= Model.Slots[i + 1] && p.DataAppuntamento.AddMinutes((double)p.Durata) > Model.Slots[i + 1]) : null;
+
+                    bool removeBorder = currentPrenotazione != null && nextPrenotazione != null && currentPrenotazione.Id == nextPrenotazione.Id;
+                    bool isStartOfPrenotazione = currentPrenotazione != null && (previousPrenotazione == null || previousPrenotazione.Id != currentPrenotazione.Id);
+
+                    int colorIndex = currentPrenotazione != null ? Math.Abs(currentPrenotazione.Id.GetHashCode()) % 8 : -1;
+                    string colorClass = colorIndex >= 0 ? $"prenotazione-color-{colorIndex}" : "";
+
+                    <div onclick="nuovoModifica(
+                            @(currentPrenotazione != null ? System.Text.Json.JsonSerializer.Serialize(currentPrenotazione) : "null"),
+                            '@(currentPrenotazione != null ? currentPrenotazione.DataAppuntamento.ToString("HH:mm") : slot.ToString("HH:mm"))'
+                        )"
+                        class="slot @(colorClass) @(removeBorder ? "no-border" : "")" style="height: @((currentPrenotazione != null ? durataSlot : 30) * 1)px; cursor: pointer;">
+                        <div>
+                            <p class="small mb-0">@slot.ToString("HH:mm")</p>
+                        </div>
+                            @if (currentPrenotazione != null && isStartOfPrenotazione)
+                            {
+                                var trattamenti = System.Text.Json.JsonSerializer.Deserialize<List<string>>(currentPrenotazione!.TrattamentiJson);
+                                
+                                <div class="d-flex align-items-center text-truncate ms-4 ms-xl-5" style="z-index: 1000;">                                
+                                    @if(removeBorder)
+                                    {
+                                        <div style="margin-top: 2rem;">
+                                            <strong>@currentPrenotazione.Cliente</strong>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
+                                                <div class="ms-1">
+                                                    @foreach(var tratt in trattamenti!)
+                                                    {
+                                                        <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <strong>@currentPrenotazione.Cliente</strong>
+                                        <div class="d-flex align-items-center">
+                                            <i class="ms-3 fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
+                                            @foreach(var tratt in trattamenti!)
+                                            {
+                                                <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p><br>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    
+                }
+            }
+            else
+            {
+                <div class="text-center text-accent font-bold mt-5">Nessuno slot disponibile in questa data</div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Nuovo/modifica trattamento -->
+<div class="modal fade" id="modal-reservation" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5">
+                <form id="reservation-form">
+                    <h4 class="font-bold my-4"><i class="fas fa-calendar-day small"></i>&nbsp;&nbsp;Appuntamento</h4>
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-2">Data appuntamento</label>
+                        <input type="date" class="d-block form-control login-form" name="dataAppuntamento" style="background-color: transparent; color: #000;" />
+                    </div>
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-1">Orario</label>
+                        <input type="time" class="d-block form-control login-form" name="oraAppuntamento" style="background-color: transparent; color: #000;" />
+                    </div>
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-1">Cliente</label>
+                        <select class="form-control" name="cliente" required>
+                            <option value="" disabled selected>Scegli</option>
+                            @foreach(var user in Model.Users!.Where(x => x.Role != "admin"))
+                            {
+                                <option value="@user.Name @user.Surname">@user.Name @user.Surname</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-1">Trattamento</label>
+                        <select class="form-control" name="trattamento" required>
+                            <option value="" disabled selected>Scegli</option>
+                            @foreach(var tratt in Model.Treatments!)
+                            {
+                                <option value="@tratt.NomeTrattamento">@tratt.NomeTrattamento</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-1">Barbiere</label>
+                        <select class="form-control" name="barbiere" required>
+                            <option value="" disabled selected>Scegli</option>
+                            @foreach(var barb in Model.Users!.Where(x => x.Role == "admin"))
+                            {
+                                <option value="@barb.Name @barb.Surname">@barb.Name @barb.Surname</option>
+                            }
+                        </select>
+                    </div>
+                    
+                    <label class="text-muted mt-3 mb-1">Prezzo</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control login-form ps-2" name="prezzo" placeholder="0,00" step="1" min="0" required>
+                        <span class="input-group-text" style="border-radius: 0; border-top: 0; border-right: 0">€</span>
+                    </div>
+                    <label class="text-muted mt-3 mb-1">Durata</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control login-form ps-2" name="durata" placeholder="0" step="1" min="0" required>
+                        <span class="input-group-text" style="border-radius: 0; border-top: 0; border-right: 0">min</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between pb-3 mt-5">
+                        <button class="btn btn-outline-danger mb-3" style="visibility: hidden;"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Elimina</button>
+                        <div>
+                            <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                            <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="id" value=""/>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        let date = new Date("@Model.Date.ToString("yyyy-MM-dd")");
+        
+        function nextDate() {
+            date.setDate(date.getDate() + 1);
+            const formattedDate = formatDateToLocalISO(date);
+            window.location.href = `/admin/agenda?date=${formattedDate}`;
+        }
+
+        function previousDate() {
+            date.setDate(date.getDate() - 1);
+            const formattedDate = formatDateToLocalISO(date);
+            window.location.href = `/admin/agenda?date=${formattedDate}`;
+        }
+
+        function formatDateToLocalISO(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function goToDate(value) {
+            if(value) {
+                window.location.href = `/admin/agenda?date=${value}`;
+            }
+        }
+
+        const form = document.querySelector('#reservation-form');
+        form.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+        const trattamenti = @Html.Raw(Json.Serialize(Model.Treatments));
+
+        function nuovoModifica(prenotazione, orario) {
+            $('#modal-reservation').modal('show');
+            
+            form.reset();
+            if(prenotazione !== null) {
+                form.querySelector('input[name="id"]').value = prenotazione.Id;
+                let dataAppuntamento = new Date(prenotazione.DataAppuntamento);
+                
+                form.querySelector('input[name="dataAppuntamento"]').value = formatDateToLocalISO(dataAppuntamento);
+                form.querySelector('input[name="oraAppuntamento"]').value = orario;
+                form.querySelector('select[name="cliente"]').value = prenotazione.Cliente;
+                form.querySelector('select[name="trattamento"]').value = (JSON.parse(prenotazione.TrattamentiJson))[0];
+                form.querySelector('select[name="barbiere"]').value = prenotazione.Barbiere;
+                form.querySelector('input[name="prezzo"]').value = prenotazione.Totale;
+                form.querySelector('input[name="durata"]').value = prenotazione.Durata;
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    modifica(prenotazione.Id);
+                });
+
+                form.querySelector('button.btn-outline-danger').style.visibility = 'visible'
+                form.querySelector('button.btn-outline-danger').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    elimina(prenotazione.Id);
+                });
+
+            } else {
+                form.querySelector('button.btn-outline-danger').style.visibility = 'hidden'
+                form.querySelector('input[name="dataAppuntamento"]').value = formatDateToLocalISO(date);
+                form.querySelector('input[name="oraAppuntamento"]').value = orario;
+
+                form.querySelector('select[name="trattamento"]').addEventListener('change', () => {
+                    const selectedName = form.querySelector('select[name="trattamento"]').value;
+                    const selectedTratt = trattamenti.find(t => t.nomeTrattamento === selectedName);
+                    console.log(selectedTratt);
+
+                    if (selectedTratt) {
+                        form.querySelector('input[name="prezzo"]').value = selectedTratt.prezzo;
+                        form.querySelector('input[name="durata"]').value = selectedTratt.durataMinuti;
+                    }
+                });
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    aggiungi();
+                });
+            }
+        }
+
+        async function modifica(id) {
+            let data = form.querySelector('input[name="dataAppuntamento"]').value;
+            let orario = form.querySelector('input[name="oraAppuntamento"]').value;
+            let trattamenti = [form.querySelector('select[name="trattamento"]').value];
+
+            const reservation = {
+                trattamenti: trattamenti,
+                totale: Number(form.querySelector('input[name="prezzo"]').value),
+                slot: data + 'T' + orario + ':00',
+                durata: Number(form.querySelector('input[name="durata"]').value),
+                barbiere: form.querySelector('select[name="barbiere"]').value,
+                cliente: form.querySelector('select[name="cliente"]').value
+            };
+
+            const response = await fetch(`/reservations?id=${id}`, { 
+                method: "PUT", 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reservation)
+            });
+
+            if(response.ok) {
+                window.location.href = window.location.href;
+            }
+        }
+
+        async function aggiungi() {
+            let data = form.querySelector('input[name="dataAppuntamento"]').value;
+            let orario = form.querySelector('input[name="oraAppuntamento"]').value;
+            let trattamenti = [form.querySelector('select[name="trattamento"]').value];
+
+            const reservation = {
+                trattamenti: trattamenti,
+                totale: Number(form.querySelector('input[name="prezzo"]').value),
+                slot: data + 'T' + orario + ':00',
+                durata: Number(form.querySelector('input[name="durata"]').value),
+                barbiere: form.querySelector('select[name="barbiere"]').value,
+                cliente: form.querySelector('select[name="cliente"]').value
+            };
+
+            const response = await fetch(`/reservations`, { 
+                method: "POST", 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reservation)
+            });
+
+            if(response.ok) {
+                window.location.href = window.location.href;
+            }
+        }
+
+        async function elimina(id) {
+            const response = await fetch(`/reservations/${id}`, { method: "DELETE" });
+            if(response.ok) {
+                window.location.href = window.location.href;
+            }
+        }
+        
+    </script>
+}

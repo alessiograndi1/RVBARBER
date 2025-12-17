@@ -1,0 +1,464 @@
+@model RVBARBER.ViewModels.PrenotaOraViewModel
+
+@{
+    ViewData["Title"] = "Prenota";
+}
+
+@section Styles
+{
+    <style>
+        .header-container {
+            background-image: url('/images/gallery/gallery994.jpeg');
+        }
+
+        @@media (max-width: 1024px) {
+            .header-container {
+                background-image: url('/images/gallery/gallery994.jpeg');
+            }
+
+            svg {
+                width: 25%;;
+            }
+        }
+
+        @@media (min-width: 1024px) {
+            p.text-accent {
+                font-size: 120%;
+            }
+        }
+
+        .container {
+            .d-flex.align-items-center.justify-content-between {
+                margin-top: 0.5rem;
+            }
+        }
+
+    </style>
+}
+
+<div class="container mt-5 px-4">
+
+    <div class="alert bg-success pt-3 p-4 px-xl-5" id="alert-success" style="display: none;">
+        <div class="text-end">
+            <i class="fas fa-times" style="cursor: pointer;" onclick="closeAlert(event)"></i>
+        </div>
+        <p class="mb-0" style="font-size: 150%;"><i class="far fa-check-circle"></i>&nbsp;&nbsp;Prenotazione confermata</p>
+        <hr style="border: 0">
+        <div class="d-flex my-4 align-items-center">
+            <div style="font-size: 200%;" id="orario-appuntamento"></div>
+            <div class="ms-4 ps-4" style="border-left: 1px solid var(--bs-light);">
+                <p class="mb-0" id="giorno-appuntamento"></p>
+                <p class="mb-0" id="giorno-mese-appuntamento"></p>
+            </div>
+        </div>
+        <p>Il tuo appuntamento è stato inserito correttamente nel nostro sistema. Ti ricordiamo che puoi consultare la prenotazione o annullarla nella sezione dedicata.</p>
+    </div>
+
+    <div class="alert bg-danger pt-3 p-4 px-xl-5" id="alert-danger" style="display: none;">
+        <div class="text-end">
+            <i class="fas fa-times" style="cursor: pointer;" onclick="closeAlert(event)"></i>
+        </div>
+        <p style="font-size: 150%;"><i class="far fa-times-circle"></i>&nbsp;&nbsp;Si è verificato un errore</p>
+        <hr style="border: 0">
+        <p>Il tuo appuntamento NON è stato inserito correttamente nel nostro sistema, ti invitiamo a riprovare. E' possibile che un altro utente abbia prenotato nello stesso momento la medesima prenotazione.</p>
+    </div>
+
+    <!-- Barber -->
+    <div class="card mt-4 mt-xl-5" id="barber">
+        <div class="card-body p-4 p-xl-0">
+            <h4 class="font-bold"><i class="far fa-user-circle text-accent"></i>&nbsp;&nbsp;SELEZIONA BARBIERE</h4>
+            <div class="col-12 col-xl-3 mt-4 mb-4 mb-xl-0">
+                <select class="form-control form-control-lg" style="color-scheme: dark; background-color: black; color: var(--bs-light); border-color: var(--bs-body-color)">
+                    <option value="" disabled selected>Scegli</option>
+                    @foreach(var b in Model.Users!)
+                    {
+                        <option value="@b.Name @b.Surname">@b.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trattamenti -->
+    @{
+        var hairCare = Model.Trattamenti!.Where(x => x.Categoria == "HAIR CARE");
+        var shave = Model.Trattamenti!.Where(x => x.Categoria == "SHAVE");
+        var combo = Model.Trattamenti!.Where(x => x.Categoria == "COMBO");
+    }
+
+    <div class="card my-4 mt-xl-5">
+        <div class="card-body p-4 p-xl-0">
+            <h4 class="font-bold"><i class="fas fa-cut text-accent"></i>&nbsp;&nbsp;SELEZIONA TRATTAMENTO</h4>
+            <h4 class="mt-5">HAIR CARE</h4>
+            <hr>
+            @foreach(var t in hairCare)
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-accent"><i class="fas fa-plus"></i></button>
+                        <p class="ms-3 mb-0">@t.NomeTrattamento</p>
+                        <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
+                    </div>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                </div>
+            }
+
+            <h4 class="mt-5">SHAVE</h4>
+            <hr>
+            @foreach(var t in shave)
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-accent"><i class="fas fa-plus"></i></button>
+                        <p class="ms-3 mb-0">@t.NomeTrattamento</p>
+                        <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
+                    </div>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                </div>
+            }
+
+            <h4 class="mt-5">COMBO</h4>
+            <hr>
+            @foreach(var t in combo)
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-accent"><i class="fas fa-plus"></i></button>
+                        <p class="ms-3 mb-0">@t.NomeTrattamento</p>
+                        <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
+                    </div>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Data e ora -->
+    <div class="card mt-4 mt-xl-5" id="orario">
+        <div class="card-body p-4 p-xl-0">
+            <h4 class="font-bold"><i class="far fa-calendar-alt text-accent"></i>&nbsp;&nbsp;SELEZIONA DATA e ORARIO</h4>
+            <div class="col-12 col-xl-3 my-4">
+                <input type="date" id="data-picker" class="form-control form-control-lg" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"/>
+            </div>
+
+            <div id="slot-container" class="d-flex flex-wrap gap-2" style="display: none;">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Riepilogo prenotazione -->
+    <div class="card my-4 mt-xl-5" id="recap-trattamenti" style="display: none;">
+        <div class="card-body p-4 p-xl-0">
+            <h3 class="mb-4">Riepilogo:</h3>
+            <div id="lista-trattamenti">
+
+            </div>
+            <div id="barbiere-trattamento" class="mt-3 mb-4">
+                <div class="text-muted"> Nessun barbiere selezionato </div>
+            </div>
+            <div id="orario-trattamento" class="mt-3 mb-4">
+                <div class="text-muted"> Nessun orario selezionato </div>
+            </div>
+
+            <hr>
+            <div class="d-flex align-items-center justify-content-between">
+                <h3 class="mb-0"><strong>Totale:</strong> <span id="totale-prezzo"></span></h3>
+                <button class="btn btn-outline-light" id="btn-prenota">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts 
+{
+    <script>
+
+        // Selezione barbiere
+        const selectBarber = document.querySelector('#barber select');
+        const barbiereTrattamento = document.querySelector('#barbiere-trattamento');
+
+        selectBarber.addEventListener('change', () => {
+            const selectedName = selectBarber.value;
+            resetPrenotazione(); 
+            selectBarber.value = selectedName;
+            barbiereTrattamento.innerHTML = `<div>Barbiere: <span class="text-accent">${selectedName}</span></div>`;
+
+            controllaPrenotazioneValida();
+        });
+
+        // Selezione dei trattamenti
+        const recapTrattamenti = document.querySelector('#recap-trattamenti');
+        const listaTrattamenti = document.querySelector('#lista-trattamenti');
+        const totalePrezzoSpan = document.getElementById('totale-prezzo');
+
+        const trattamentiSelezionati = new Set();
+        let totale = 0;
+        let durata = 0;
+
+        document.querySelectorAll('button.btn-accent').forEach(button => {
+            button.addEventListener('click', (event) => {
+                if(trattamentiSelezionati.size) {
+                    slotContainer.innerHTML = '';
+                    slotContainer.style.display = 'none';
+                    selectedSlot = null;
+                    datePicker.value = null;
+
+                    orarioTrattamento.innerHTML = `<div class="text-muted" onclick="#orario"> Nessun orario selezionato </div>`;
+                    btnPrenota.classList.add('disabled');
+
+                    controllaPrenotazioneValida();
+                }
+
+                const button = event.currentTarget;
+                button.classList.add('disabled');
+                button.classList.add('selected');
+                button.innerHTML = '<i class="fas fa-check"></i>';
+
+                const riga = button.closest('.d-flex.justify-content-between');
+                riga.classList.add('disabled-row');
+                const descrizione = riga.querySelector('.d-flex.align-items-center p').textContent.trim().replace(/\s*\([^)]*\)/g, '');
+                const prezzoTesto = riga.querySelector('.text-accent').textContent.trim();
+
+                const durataTesto = riga.querySelector('.d-flex.align-items-center small.text-muted').textContent;
+                const durataMinuti = parseInt(durataTesto.match(/\d+/)[0]);
+
+                if (!isNaN(durataMinuti)) {
+                    durata += durataMinuti;
+                }
+                
+                if (trattamentiSelezionati.has(descrizione)) {
+                    return;
+                }
+
+                recapTrattamenti.style.display = 'block';
+
+                const prezzoNumerico = parseFloat(prezzoTesto.replace(/[^\d,.-]/g, '').replace(',', '.'));
+
+                if (!isNaN(prezzoNumerico)) {
+                    const badge = document.createElement('div');
+                    badge.classList.add('badge', 'badge-accent', 'me-3', 'mb-3', 'ps-3', 'py-2');
+                    badge.textContent = `${descrizione} (${prezzoTesto})`;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.classList.add('btn', 'btn-sm', 'ms-3', 'text-light');
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+
+                    removeBtn.addEventListener('click', () => {
+
+                        if(trattamentiSelezionati.size) {
+                            slotContainer.innerHTML = '';
+                            slotContainer.style.display = 'none';
+                            selectedSlot = null;
+                            datePicker.value = null;
+
+                            orarioTrattamento.innerHTML = `<div class="text-muted" onclick="#orario"> Nessun orario selezionato </div>`;
+                            btnPrenota.classList.add('disabled');
+
+                            controllaPrenotazioneValida();
+                        }
+
+                        riga.classList.remove('disabled-row');
+                        button.classList.remove('disabled');
+                        button.classList.remove('selected');
+                        button.innerHTML = '<i class="fas fa-plus"></i>';
+
+                        listaTrattamenti.removeChild(badge);
+                        trattamentiSelezionati.delete(descrizione);
+                        totale -= prezzoNumerico;
+                        totalePrezzoSpan.textContent = `${totale.toFixed(2).replace('.', ',')} €`;
+                        durata -= durataMinuti;
+
+                        if (listaTrattamenti.children.length === 0) {
+                            recapTrattamenti.style.display = 'none';
+                        }
+                    });
+
+                    badge.appendChild(removeBtn);
+                    listaTrattamenti.appendChild(badge);
+                    trattamentiSelezionati.add(descrizione);
+
+                    totale += prezzoNumerico;
+                    totalePrezzoSpan.textContent = `${totale.toFixed(2).replace('.', ',')} €`;
+
+                    if(selectedSlot) {
+                        orarioTrattamento.innerHTML = `
+                            <div>
+                                il giorno <span class="text-accent">${new Date(selectedSlot).toLocaleDateString('it-IT')}</span> 
+                                alle <span class="text-accent">${new Date(selectedSlot).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        });
+
+        // Data e ora appuntamento
+        const datePicker = document.getElementById('data-picker');
+        const slotContainer = document.getElementById('slot-container');
+        const orarioTrattamento = document.querySelector('#orario-trattamento');
+
+        let selectedSlot = null;
+
+        datePicker.addEventListener('change', async () => {
+            let selectedDate = datePicker.value;
+            
+            slotContainer.innerHTML = '';
+            slotContainer.style.display = 'none';
+            selectedSlot = null;
+            
+            // Se la data è stata cancellata
+            if (!selectedDate) {
+                orarioTrattamento.innerHTML = `<div class="text-muted" onclick="#orario"> Nessun orario selezionato </div>`;
+                btnPrenota.classList.add('disabled');
+
+                controllaPrenotazioneValida();
+                return;
+            }
+
+            slotContainer.style.justifyContent = 'center';
+            slotContainer.innerHTML = `<div class="spinner spinner-grow text-muted my-5"></div>`;
+
+            const reservations = await fetch(`/reservations/available-slots?date=${selectedDate}&barber=${selectBarber.value}&durataMinuti=${durata}`);
+            const slots = await reservations.json();
+
+            if (slots.length === 0) {
+                slotContainer.innerHTML = '<p class="text-accent">Nessuno slot disponibile per questa data</p>';
+                btnPrenota.classList.add('disabled');
+                slotContainer.style.display = 'block';
+                return;
+            }
+
+            controllaPrenotazioneValida();
+
+            slotContainer.style.justifyContent = 'start';
+            slotContainer.innerHTML = `<h4 class="font-bold my-4 w-100"><i class="far fa-clock text-accent"></i>&nbsp;&nbsp;ORARI DISPONIBILI</h4>`;
+
+            slots.forEach(slot => {
+                const badge = document.createElement('div');
+                badge.className = 'slot-badge';
+                badge.textContent = new Date(slot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                badge.addEventListener('click', () => {
+                    document.querySelectorAll('.slot-badge').forEach(el => el.classList.remove('selected', 'disabled-row'));
+                    badge.classList.add('selected');
+                    badge.classList.add('disabled-row');
+                    selectedSlot = slot;
+
+                    orarioTrattamento.innerHTML = `
+                        <div>
+                            il giorno <span class="font-bold text-accent">${new Date(selectedSlot).toLocaleDateString('it-IT')}</span> 
+                            alle <span class="font-bold text-accent">${new Date(selectedSlot).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                    `;
+
+                    btnPrenota.classList.remove('disabled');
+
+                    controllaPrenotazioneValida();
+                });
+
+                slotContainer.appendChild(badge);
+            });
+
+            slotContainer.style.display = 'flex';
+        });
+
+        // Prenotazione
+        const alertSuccess = document.querySelector('#alert-success');
+        const alertDanger = document.querySelector('#alert-danger');
+
+        const btnPrenota = document.querySelector('#btn-prenota');
+        btnPrenota.classList.add('disabled');
+
+        btnPrenota.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const order = {
+                trattamenti: [...trattamentiSelezionati],
+                totale: totale,
+                slot: selectedSlot,
+                durata: durata,
+                barbiere: selectBarber.value 
+            }
+
+            const response = await fetch('/reservations', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+            });
+
+            const data = await response.json();
+
+            btnPrenota.classList.add('disabled');
+
+            if (response.ok) {
+                window.scrollTo(0, 0);
+                alertSuccess.style.display = 'block';
+                alertSuccess.querySelector('#orario-appuntamento').textContent = new Date(selectedSlot).toLocaleTimeString('it-IT', { hour: "2-digit", minute: "2-digit" });
+                alertSuccess.querySelector('#giorno-appuntamento').textContent = new Date(selectedSlot).toLocaleDateString('it-IT', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase());
+                alertSuccess.querySelector('#giorno-mese-appuntamento').textContent = 
+                    `${new Date(selectedSlot).toLocaleDateString('it-IT', { day: '2-digit' })} ` +
+                    `${new Date(selectedSlot).toLocaleDateString('it-IT', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}`;
+            } else {
+                window.scrollTo(0, 0);
+                alertDanger.style.display = 'block';
+            }
+        });
+
+        function closeAlert(event) {
+            const target = event.currentTarget;
+            const parent = target.parentElement;
+            parent.parentElement.style.display = 'none';
+
+            resetPrenotazione();
+        }
+
+        function resetPrenotazione() {
+            datePicker.value = null;
+            slotContainer.innerHTML = '';
+            slotContainer.style.display = 'none';
+            selectedSlot = null;
+
+            recapTrattamenti.style.display = 'none';
+            listaTrattamenti.innerHTML = '';
+            trattamentiSelezionati.clear();
+
+            totale = 0;
+            totalePrezzoSpan.textContent = '0,00 €';
+            
+            durata = 0;
+            selectBarber.selectedIndex = 0;
+
+            document.querySelectorAll('button.btn-accent').forEach(button => {
+                button.classList.remove('disabled', 'selected');
+                button.innerHTML = '<i class="fas fa-plus"></i>';
+                const riga = button.closest('.d-flex.justify-content-between');
+                riga?.classList.remove('disabled-row');
+            });
+
+            orarioTrattamento.innerHTML = `
+                <div class="text-muted"> Nessun orario selezionato </div>
+            `;
+            barbiereTrattamento.innerHTML = `
+                <div class="text-muted"> Nessun barbiere selezionato </div>
+            `;
+
+            btnPrenota.classList.add('disabled');
+        }
+
+        function controllaPrenotazioneValida() {
+            const barbiereSelezionato = selectBarber.value;
+            const dataSelezionata = datePicker.value;
+            const slotSelezionato = selectedSlot;
+
+            if (barbiereSelezionato && dataSelezionata && slotSelezionato) {
+                btnPrenota.classList.remove('disabled');
+            } else {
+                btnPrenota.classList.add('disabled');
+            }
+        }
+
+    </script>
+}

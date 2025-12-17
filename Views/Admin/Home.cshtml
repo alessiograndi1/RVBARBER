@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Admin";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+            }
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card p-0">
+                <div class="card-body">
+                    <h4 class="card-header"><i class="fas fa-cogs text-accent"></i>&nbsp;&nbsp;Pannello di amministrazione</h4>
+                    <hr>
+                    <div class="list-group">
+                        <a asp-action="Agenda" asp-controller="Admin" asp-route-date="@DateTime.Now.ToString("dd-MM-yyyy")" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="far fa-calendar-alt text-accent"></i>&nbsp;&nbsp;Agenda</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                        <a asp-action="Prenotazioni" asp-controller="Admin" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="far fa-bookmark text-accent"></i>&nbsp;&nbsp;Prenotazioni</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                        <a asp-action="Clienti" asp-controller="Admin" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="fas fa-users text-accent"></i>&nbsp;&nbsp;Clienti</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                        <a asp-action="Orari" asp-controller="Admin" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="far fa-clock text-accent"></i>&nbsp;&nbsp;Orari di apertura</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                        <a asp-action="Chiusure" asp-controller="Admin" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="fas fa-user-clock text-accent"></i>&nbsp;&nbsp;Orari straordinari</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                        <a asp-action="Trattamenti" asp-controller="Admin" class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 overflow-hidden text-nowrap text-truncate">
+                                    <strong><i class="fas fa-cut text-accent"></i>&nbsp;&nbsp;Trattamenti</strong>
+                                </p>
+                                <i class="fas fa-arrow-right small text-muted"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+    </script>
+}

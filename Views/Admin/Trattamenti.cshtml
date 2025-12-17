@@ -1,0 +1,193 @@
+@model List<RVBARBER.Models.Treatment>;
+
+@{
+    ViewData["Title"] = "Trattamenti";
+}
+
+@section Styles
+{
+    <style>
+
+        #content {
+            margin-top: 120px;
+        }
+
+        @@media (max-width: 1024px) {
+            #content {
+                margin-top: 70px;
+
+                .trattamento {
+                    font-size: 85%;
+                }
+            }
+        }
+
+    </style>
+}
+
+<div class="container px-4" id="content">
+    <div class="row">
+        <div class="col-auto">
+            <div class="card p-0">
+                <div class="card-body p-2">
+                    <a asp-action="Home" asp-controller="Admin" class="btn btn-sm btn-borderless text-light"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mt-4">
+            <div class="card p-0">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                        <h4 class="mb-0"><i class="fas fa-cut small"></i>&nbsp;&nbsp;Trattamenti</h4>
+                        <i class="fas fa-plus text-muted" style="cursor: pointer;" onclick="nuovoTrattamento()"></i>
+                    </div>
+                    <hr>
+                    @if(Model.Count > 0)
+                    {
+                        <div class="list-group">
+                            @foreach(var tratt in Model)
+                            {
+                                <a style="cursor: pointer;" class="list-group-item list-group-item-action py-3 trattamento" 
+                                    onclick="modificaTrattamento('@tratt.Id', '@tratt.NomeTrattamento', '@tratt.Descrizione', '@tratt.Categoria', '@tratt.Prezzo.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)', '@tratt.DurataMinuti')">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="overflow-hidden text-nowrap text-truncate">
+                                            <strong class="me-3">@tratt.NomeTrattamento</strong>
+                                            <span class="d-block text-muted">@tratt.Descrizione</span>
+                                        </div>
+                                        <div class="text-nowrap">
+                                            @tratt.DurataMinuti <span class="small text-muted">min</span> / <span class="text-accent font-bold">@tratt.Prezzo.ToString("0.00") €</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center small text-muted">Non esistono trattamenti</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nuovo/modifica trattamento -->
+<div class="modal fade" id="modal-treatment">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5">
+                <form id="treatment-form" data-url="/admin/trattamenti">
+                    <h4 class="my-4 font-bold"></h4>
+                    <div class="mb-3">
+                        <input type="text" class="form-control login-form" name="nomeTrattamento" placeholder="Nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control login-form" name="descrizione" placeholder="Descrizione">
+                    </div>
+                    <div class="mt-4 mb-3">
+                        <label class="text-muted mb-2">Categoria</label>
+                        <select class="form-control" name="categoria" required>
+                            <option value="HAIR CARE">HAIR CARE</option>
+                            <option value="SHAVE">SHAVE</option>
+                            <option value="COMBO">COMBO</option>
+                        </select>
+                    </div>
+                    <label class="text-muted mb-1">Prezzo</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control login-form ps-2" name="prezzo" placeholder="0,00" step="1" min="0" required>
+                        <span class="input-group-text" style="border-radius: 0; border-top: 0; border-right: 0">€</span>
+                    </div>
+                    <label class="text-muted mb-1">Durata</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control login-form ps-2" name="durataMinuti" placeholder="0" step="1" min="0" required>
+                        <span class="input-group-text" style="border-radius: 0; border-top: 0; border-right: 0">min</span>
+                    </div>
+                    <div class="align-items-center justify-content-between pb-3 mt-5" id="form-footer-modifica">
+                        <button class="btn btn-outline-danger mb-3" onclick="eliminaTrattamento()"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Elimina</button>
+                        <div>
+                            <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                            <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                        </div>
+                    </div>
+                    <div class="text-end pb-3 mt-5" id="form-footer-nuovo">
+                        <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                        <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                    </div>
+                    <input type="hidden" name="id" value=""/>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        document.querySelector('.header-container').remove();
+
+        const treatmentForm = document.getElementById('treatment-form');
+
+        function nuovoTrattamento() {
+            $('#modal-treatment').modal('show');
+
+            treatmentForm.querySelector('h4').innerHTML = `<i class="fas fa-cut small"></i>&nbsp;&nbsp;Nuovo trattamento`;
+            treatmentForm.querySelector('#form-footer-nuovo').style.display = 'block';
+            treatmentForm.querySelector('#form-footer-modifica').style.display = 'none';
+            treatmentForm.reset();
+            treatmentForm.querySelector('input[name="id"]').value = "";
+        }
+
+        function modificaTrattamento(trattId, nome, descrizione, categoria, prezzo, durata) {
+            $('#modal-treatment').modal('show');
+
+            treatmentForm.querySelector('#form-footer-nuovo').style.display = 'none';
+            treatmentForm.querySelector('#form-footer-modifica').style.display = 'flex';
+            treatmentForm.querySelector('h4').innerHTML = `<i class="fas fa-cut small"></i>&nbsp;&nbsp;Modifica trattamento`;
+            
+            treatmentForm.querySelector('input[name="nomeTrattamento"]').value = nome;
+            treatmentForm.querySelector('input[name="descrizione"]').value = descrizione;
+            treatmentForm.querySelector('select[name="categoria"]').value = categoria;
+            treatmentForm.querySelector('input[name="prezzo"]').value = prezzo;
+            treatmentForm.querySelector('input[name="durataMinuti"]').value = durata;
+            treatmentForm.querySelector('input[name="id"]').value = trattId;
+        }
+
+        async function eliminaTrattamento() {
+            const id = treatmentForm.querySelector('input[name="id"]').value;
+            
+            const response = await fetch(`${treatmentForm.dataset.url}/${id}`, { method: 'DELETE' });
+
+            if(response.ok) {
+                $('#modal-treatment').modal('hide');
+                window.location.href = window.location.href;
+            }
+        }
+
+        treatmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = treatmentForm.querySelector('input[name="id"]').value;
+            const isEdit = id && id.trim() !== "";
+
+            const url = isEdit ? `${treatmentForm.dataset.url}/${id}` : treatmentForm.dataset.url;
+            const method = isEdit ? "PUT" : "POST";
+
+            const formData = new FormData(treatmentForm);
+
+            const response = await fetch(url, {
+                method,
+                body: formData
+            });
+
+            if(response.ok) {
+                $('#modal-treatment').modal('hide');
+                window.location.href = window.location.href;
+            }
+        });
+
+    </script>
+}
