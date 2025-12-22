@@ -22,11 +22,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 var app = builder.Build();
 
 
-using (var scope = app.Services.CreateAsyncScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.MigrateAsync(); 
-}
+// using (var scope = app.Services.CreateAsyncScope())
+// {
+//     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//     await dbContext.Database.MigrateAsync(); 
+// }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
