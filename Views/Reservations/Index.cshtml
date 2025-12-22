@@ -38,12 +38,11 @@
 
 <div class="container mt-5 px-4">
 
-    <div class="alert bg-success pt-3 p-4 px-xl-5" id="alert-success" style="display: none;">
+    <div class="alert bg-success pt-3 p-4 px-xl-5" id="alert-success" style="display: none; border-radius: 8px;">
         <div class="text-end">
             <i class="fas fa-times" style="cursor: pointer;" onclick="closeAlert(event)"></i>
         </div>
-        <p class="mb-0" style="font-size: 150%;"><i class="far fa-check-circle"></i>&nbsp;&nbsp;Prenotazione confermata</p>
-        <hr style="border: 0">
+        <h4 class="mb-0" style="font-size: 150%;"><i class="far fa-check-circle"></i>&nbsp;&nbsp;Prenotazione confermata</h4>
         <div class="d-flex my-4 align-items-center">
             <div style="font-size: 200%;" id="orario-appuntamento"></div>
             <div class="ms-4 ps-4" style="border-left: 1px solid var(--bs-light);">
@@ -51,16 +50,15 @@
                 <p class="mb-0" id="giorno-mese-appuntamento"></p>
             </div>
         </div>
-        <p>Il tuo appuntamento è stato inserito correttamente nel nostro sistema. Ti ricordiamo che puoi consultare la prenotazione o annullarla nella sezione dedicata.</p>
+        <p>Il tuo appuntamento è stato inserito correttamente nel nostro sistema. Ti ricordiamo che puoi consultare la prenotazione o annullarla dalle impostazioni del profilo.</p>
     </div>
 
-    <div class="alert bg-danger pt-3 p-4 px-xl-5" id="alert-danger" style="display: none;">
+    <div class="alert bg-danger pt-3 p-4 px-xl-5" id="alert-danger" style="display: none; border-radius: 8px;">
         <div class="text-end">
             <i class="fas fa-times" style="cursor: pointer;" onclick="closeAlert(event)"></i>
         </div>
-        <p style="font-size: 150%;"><i class="far fa-times-circle"></i>&nbsp;&nbsp;Si è verificato un errore</p>
-        <hr style="border: 0">
-        <p>Il tuo appuntamento NON è stato inserito correttamente nel nostro sistema, ti invitiamo a riprovare. E' possibile che un altro utente abbia prenotato nello stesso momento la medesima prenotazione.</p>
+        <h4 class="mb-4" style="font-size: 150%;"><i class="far fa-times-circle"></i>&nbsp;&nbsp;Si è verificato un errore</h4>
+        <p>Il tuo appuntamento NON è stato inserito correttamente nel nostro sistema, ti invitiamo a riprovare.</p>
     </div>
 
     <div class="row my-4">
@@ -104,8 +102,7 @@
     <div class="card my-4 mt-xl-5">
         <div class="card-body p-4 p-xl-0">
             <h4 class="font-bold"><i class="fas fa-cut text-accent"></i>&nbsp;&nbsp;SELEZIONA TRATTAMENTO</h4>
-            <h4 class="mt-5">HAIR CARE</h4>
-            <hr>
+            <h4 class="mt-5 mb-4">HAIR CARE</h4>
             @foreach(var t in hairCare)
             {
                 <div class="d-flex align-items-center justify-content-between">
@@ -118,8 +115,7 @@
                 </div>
             }
 
-            <h4 class="mt-5">SHAVE</h4>
-            <hr>
+            <h4 class="mt-5 mb-4">SHAVE</h4>
             @foreach(var t in shave)
             {
                 <div class="d-flex align-items-center justify-content-between">
@@ -132,8 +128,7 @@
                 </div>
             }
 
-            <h4 class="mt-5">COMBO</h4>
-            <hr>
+            <h4 class="mt-5 mb-4">COMBO</h4>
             @foreach(var t in combo)
             {
                 <div class="d-flex align-items-center justify-content-between">
