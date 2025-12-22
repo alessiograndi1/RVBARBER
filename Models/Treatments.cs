@@ -4,6 +4,7 @@ namespace RVBARBER.Models;
 
 public class Treatment
 {
+    [Key]
     public int Id { get; set; }
 
     [Required]
@@ -12,7 +13,7 @@ public class Treatment
     public string? Descrizione { get; set; }
 
     [Required]
-    public decimal Prezzo { get; set; }
+    public double Prezzo { get; set; }
 
     [Required]
     public int DurataMinuti { get; set; }

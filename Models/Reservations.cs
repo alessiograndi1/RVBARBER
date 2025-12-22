@@ -14,13 +14,13 @@ public class Reservation
     public DateTime DataAppuntamento { get; set; }
 
     [Required]
-    public decimal Totale { get; set; }
+    public double Totale { get; set; }
 
     [Required]
     public string TrattamentiJson { get; set; } = null!;
 
     [Required]
-    public decimal Durata { get; set; }
+    public double Durata { get; set; }
 
     public string? Cliente { get; set; }
     
