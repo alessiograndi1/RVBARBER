@@ -91,6 +91,14 @@
             padding-left: 0.3rem;
         }
 
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            border: none;
+            background-color: #ededed;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            border-right: none;;
+        }
+
     </style>
 }
 
@@ -243,7 +251,6 @@
                     <div class="mt-4 mb-3">
                         <label class="text-muted mb-1">Barbiere</label>
                         <select class="form-control" name="barbiere" required>
-                            <option value="" disabled selected>Scegli</option>
                             @foreach(var barb in Model.Users!.Where(x => x.Role == "admin"))
                             {
                                 <option value="@barb.Name @barb.Surname">@barb.Name @barb.Surname</option>
@@ -325,6 +332,7 @@
         // Inizializza select2
         const cliente = $('select[name="cliente"]');
         const trattamento = $('select[name="trattamento"]');
+        const barbiere = $('select[name="barbiere"]');
         cliente.select2({
             dropdownParent: $('#modal-reservation'),
             placeholder: 'Scegli',
@@ -334,6 +342,12 @@
         trattamento.select2({
             dropdownParent: $('#modal-reservation'),
             placeholder: 'Seleziona uno o più trattamenti',
+            allowClear: true,
+            width: '100%'
+        });
+        barbiere.select2({
+            dropdownParent: $('#modal-reservation'),
+            placeholder: 'Scegli',
             allowClear: true,
             width: '100%'
         });
@@ -347,6 +361,7 @@
             form.reset();
             $('select[name="cliente"]').val(null).trigger('change');
             $('select[name="trattamento"]').val(null).trigger('change');
+            $('select[name="barbiere"]').val(null).trigger('change');
 
             if(prenotazione !== null) {
                 form.querySelector('input[name="id"]').value = prenotazione.Id;
@@ -357,8 +372,8 @@
 
                 $('select[name="cliente"]').val(prenotazione.Cliente).trigger('change');
                 $('select[name="trattamento"]').val(JSON.parse(prenotazione.TrattamentiJson)).trigger('change');
+                $('select[name="barbiere"]').val(prenotazione.Barbiere).trigger('change');
 
-                form.querySelector('select[name="barbiere"]').value = prenotazione.Barbiere;
                 form.querySelector('input[name="prezzo"]').value = prenotazione.Totale;
                 form.querySelector('input[name="durata"]').value = prenotazione.Durata;
 
