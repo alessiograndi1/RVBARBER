@@ -65,6 +65,20 @@
         .prenotazione-color-6 { background-color: #bdb2ff; color: #000; }
         .prenotazione-color-7 { background-color: #ffc6ff; color: #000; }
 
+        /* Testo opzioni dropdown */
+        .select2-results__option {
+            color: #000;
+            background-color: #fff;
+        }
+
+        /* Opzione evidenziata (hover / keyboard) */
+        .select2-container--default 
+        .select2-results__option--highlighted
+        .select2-results__option--selectable {
+            background-color: #000;
+            color: #fff;
+        }
+
     </style>
 }
 
@@ -196,9 +210,8 @@
                         <input type="time" class="d-block form-control login-form" name="oraAppuntamento" style="background-color: transparent; color: #000;" />
                     </div>
                     <div class="mt-4 mb-3">
-                        <label class="text-muted mb-1">Cliente</label>
-                        <select class="form-control" name="cliente" required>
-                            <option value="" disabled selected>Scegli</option>
+                        <label class="d-block text-muted mb-1">Cliente</label>
+                        <select class="form-control" name="cliente" required style="color: black">
                             @foreach(var user in Model.Users!.Where(x => x.Role != "admin"))
                             {
                                 <option value="@user.Name @user.Surname">@user.Name @user.Surname</option>
@@ -206,9 +219,9 @@
                         </select>
                     </div>
                     <div class="mt-4 mb-3">
-                        <label class="text-muted mb-1">Trattamento</label>
-                        <select class="form-control" name="trattamento" required>
-                            <option value="" disabled selected>Scegli</option>
+                        <label class="d-block text-muted mb-1">Trattamento</label>
+                        <select class="form-control" name="trattamento" required style="color: black !important">
+                            @* <option value="" disabled selected>Scegli</option> *@
                             @foreach(var tratt in Model.Treatments!)
                             {
                                 <option value="@tratt.NomeTrattamento">@tratt.NomeTrattamento</option>
@@ -296,20 +309,43 @@
                 e.preventDefault();
             }
         });
+
+        // Inizializza Select2 nei modali
+        $('#modal-reservation').on('shown.bs.modal', function () {
+            $('select[name="cliente"]').select2({
+                dropdownParent: $('#modal-reservation'),
+                placeholder: 'Scegli',
+                allowClear: true,
+                width: '100%'
+            });
+            $('select[name="trattamento"]').select2({
+                dropdownParent: $('#modal-reservation'),
+                placeholder: 'Scegli',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+        
         const trattamenti = @Html.Raw(Json.Serialize(Model.Treatments));
 
         function nuovoModifica(prenotazione, orario) {
             $('#modal-reservation').modal('show');
             
             form.reset();
+            $('select[name="cliente"]').val(null).trigger('change');
+            $('select[name="trattamento"]').val(null).trigger('change');
+
             if(prenotazione !== null) {
                 form.querySelector('input[name="id"]').value = prenotazione.Id;
                 let dataAppuntamento = new Date(prenotazione.DataAppuntamento);
                 
                 form.querySelector('input[name="dataAppuntamento"]').value = formatDateToLocalISO(dataAppuntamento);
                 form.querySelector('input[name="oraAppuntamento"]').value = orario;
-                form.querySelector('select[name="cliente"]').value = prenotazione.Cliente;
-                form.querySelector('select[name="trattamento"]').value = (JSON.parse(prenotazione.TrattamentiJson))[0];
+                
+                //form.querySelector('select[name="cliente"]').value = prenotazione.Cliente;
+                //form.querySelector('select[name="trattamento"]').value = (JSON.parse(prenotazione.TrattamentiJson))[0];
+                $('select[name="cliente"]').val(prenotazione.Cliente).trigger('change');
+                $('select[name="trattamento"]').val((JSON.parse(prenotazione.TrattamentiJson))[0]).trigger('change');
                 form.querySelector('select[name="barbiere"]').value = prenotazione.Barbiere;
                 form.querySelector('input[name="prezzo"]').value = prenotazione.Totale;
                 form.querySelector('input[name="durata"]').value = prenotazione.Durata;
@@ -330,10 +366,20 @@
                 form.querySelector('input[name="dataAppuntamento"]').value = formatDateToLocalISO(date);
                 form.querySelector('input[name="oraAppuntamento"]').value = orario;
 
-                form.querySelector('select[name="trattamento"]').addEventListener('change', () => {
+                @* form.querySelector('select[name="trattamento"]').addEventListener('change', () => {
                     const selectedName = form.querySelector('select[name="trattamento"]').value;
                     const selectedTratt = trattamenti.find(t => t.nomeTrattamento === selectedName);
                     console.log(selectedTratt);
+
+                    if (selectedTratt) {
+                        form.querySelector('input[name="prezzo"]').value = selectedTratt.prezzo;
+                        form.querySelector('input[name="durata"]').value = selectedTratt.durataMinuti;
+                    }
+                }); *@
+
+                $('select[name="trattamento"]').off('change').on('change', function () {
+                    const selectedValue = $('select[name="trattamento"]').val();
+                    const selectedTratt = trattamenti.find(t => t.nomeTrattamento === selectedValue);
 
                     if (selectedTratt) {
                         form.querySelector('input[name="prezzo"]').value = selectedTratt.prezzo;
