@@ -111,7 +111,14 @@ public class ReservationsController(ILogger<ReservationsController> logger, AppD
                 .Sum(t => t.DurataMinuti);
 
             var inizio = res.DataAppuntamento;
-            var fine = inizio.AddMinutes(durataTotale);
+            var durataPrenotazione = res.Durata;
+            // Se la durata prenotata è diversa dal totale di default dei trattamenti, nella prenotazione 
+            // uso quella della prenotazione; altrimenti il default dei trattamenti
+            var durataEffettiva = durataPrenotazione != durataTotale 
+                ? durataPrenotazione 
+                : durataTotale;
+
+            var fine = inizio.AddMinutes(durataEffettiva);
 
             var blocco = inizio;
             while (blocco < fine)
