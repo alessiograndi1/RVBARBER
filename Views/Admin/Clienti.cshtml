@@ -34,7 +34,10 @@
             <div class="card p-0">
                 <div class="card-body">
                     <div class="card-header d-flex align-items-center justify-content-between pb-0 mb-4">
-                        <h4 class="mb-0"><i class="fas fa-users small"></i>&nbsp;&nbsp;Clienti</h4>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="mb-0"><i class="fas fa-users small"></i>&nbsp;&nbsp;Clienti</h4>
+                        </div>
+                        <i class="fas fa-plus text-muted" style="cursor: pointer;" onclick="openNewClienteModal()"></i>
                     </div>
                     <div class="list-group">
                         @foreach(var cliente in Model.OrderBy(x => x.Name).ThenBy(x => x.Surname))
@@ -56,9 +59,75 @@
     </div>
 </div>
 
+
+<!-- Nuovo/modifica trattamento -->
+<div class="modal fade" id="modal-new-cliente" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header p-2">
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5">
+                <form id="new-cliente-form">
+                    <h4 class="font-bold my-4"><i class="fas fa-user-plus small"></i>&nbsp;&nbsp;Nuovo cliente</h4>
+                    <div class="mb-3">
+                        <input type="text" class="form-control login-form" name="name" placeholder="Nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control login-form" name="surname" placeholder="Cognome" required>
+                    </div>
+                        <div class="mb-3">
+                        <input type="tel" class="form-control login-form" name="phone" placeholder="Telefono" pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control login-form" name="email" placeholder="Email" required>
+                    </div>
+                    
+                    <div class="text-end pb-3 mt-5">
+                        <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>
+                        <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <script>
         document.querySelector('.header-container').remove();
+
+        function openNewClienteModal() {
+            var modal = new bootstrap.Modal(document.getElementById('modal-new-cliente'));
+            modal.show();
+
+            const form = document.getElementById('new-cliente-form');
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const data = {
+                    name: formData.get('name'),
+                    surname: formData.get('surname'),
+                    phone: formData.get('phone'),
+                    email: formData.get('email')
+                };
+
+                console.log(data);
+
+                const response = await fetch('/admin/clienti', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if(response.ok) {
+                    window.location.href = window.location.href;
+                }
+            });
+        }
     </script>
 }

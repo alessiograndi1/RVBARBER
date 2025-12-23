@@ -170,41 +170,40 @@
                         <div>
                             <p class="small mb-0">@slot.ToString("HH:mm")</p>
                         </div>
-                            @if (currentPrenotazione != null && isStartOfPrenotazione)
-                            {
-                                var trattamenti = System.Text.Json.JsonSerializer.Deserialize<List<string>>(currentPrenotazione!.TrattamentiJson);
+                        @if (currentPrenotazione != null && isStartOfPrenotazione)
+                        {
+                            var trattamenti = System.Text.Json.JsonSerializer.Deserialize<List<string>>(currentPrenotazione!.TrattamentiJson);
 
-                                <div class="d-flex align-items-center text-truncate ms-4 ms-xl-5" style="z-index: 1000;">
-                                    @if(removeBorder)
-                                    {
-                                        <div style="margin-top: 2rem;">
-                                            <strong>@currentPrenotazione.Cliente</strong>
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
-                                                <div class="ms-1">
-                                                    @foreach(var tratt in trattamenti!)
-                                                    {
-                                                        <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
+                            <div class="d-flex align-items-center text-truncate ms-4 ms-xl-5" style="z-index: 1000;">
+                                @if(removeBorder)
+                                {
+                                    <div style="margin-top: 2rem;">
                                         <strong>@currentPrenotazione.Cliente</strong>
                                         <div class="d-flex align-items-center">
-                                            <i class="ms-3 fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
-                                            @foreach(var tratt in trattamenti!)
-                                            {
-                                                <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p><br>
-                                            }
+                                            <i class="fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
+                                            <div class="ms-1">
+                                                @foreach(var tratt in trattamenti!)
+                                                {
+                                                    <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p>
+                                                }
+                                            </div>
                                         </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-
+                                    </div>
+                                }
+                                else
+                                {
+                                    <strong>@currentPrenotazione.Cliente</strong>
+                                    <div class="d-flex align-items-center">
+                                        <i class="ms-3 fas fa-cut" style="font-size: 60%;">&nbsp;&nbsp;</i>
+                                        @foreach(var tratt in trattamenti!)
+                                        {
+                                            <p class="mb-0 d-block text-truncate" style="font-size: 70%;">@tratt</p><br>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
                 }
             }
             else
@@ -273,7 +272,7 @@
                         <span class="input-group-text" style="border-radius: 0; border-top: 0; border-right: 0">min</span>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-between pb-3 mt-5">
+                    <div class="d-flex align-items-center justify-content-between pb-4 mt-5">
                         <button class="btn btn-outline-danger mb-3" style="visibility: hidden;"><i class="far fa-trash-alt"></i>&nbsp;&nbsp;Elimina</button>
                         <div>
                             <button type="submit" class="btn btn-dark mb-3 py-2">Salva</button>

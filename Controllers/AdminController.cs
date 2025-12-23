@@ -365,4 +365,31 @@ public class AdminController(ILogger<AccountController> logger, AppDbContext dbC
         return View(clienti);
     }
 
+    [HttpPost("/admin/clienti")]
+    public async Task<IActionResult> NuovoCliente([FromBody] NuovoClienteViewModel nuovoCliente)
+    {
+        var role = User.FindFirstValue(ClaimTypes.Role);
+
+        if (role != "admin")
+        {
+            return Unauthorized(new { message = "Claim Role non valido." });
+        }
+
+        Console.WriteLine("Ricevuto nuovo cliente: " + nuovoCliente.Name + " " + nuovoCliente.Surname + " " + nuovoCliente.Phone + " " + nuovoCliente.Email);
+
+        await _dbContext.Users.AddAsync(new User {
+            Name = nuovoCliente.Name,
+            Surname = nuovoCliente.Surname,
+            Phone = nuovoCliente.Phone,
+            Email = nuovoCliente.Email,
+            Username = string.Format($"{nuovoCliente.Name.ElementAt(0)}{nuovoCliente.Surname}").ToLower().ToString(),
+            Role = "base",
+            Password = "Temp123"
+        });
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
 }
