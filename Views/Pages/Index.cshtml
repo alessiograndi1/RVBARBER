@@ -239,7 +239,7 @@
             {
                 <div class="d-flex align-items-center justify-content-between">
                     <p class="mb-0">@t.NomeTrattamento</p>
-                    <p class="mb-0">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
 
@@ -248,7 +248,7 @@
             {
                 <div class="d-flex align-items-center justify-content-between">
                     <p class="mb-0">@t.NomeTrattamento</p>
-                    <p class="mb-0">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
 
@@ -257,7 +257,7 @@
             {
                 <div class="d-flex align-items-center justify-content-between">
                     <p class="mb-0">@t.NomeTrattamento</p>
-                    <p class="mb-0">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
         </div>
@@ -269,7 +269,7 @@
                 <div class="card-body mb-4">
 
                     <i class="fa-solid fa-location-dot mt-4 mt-xl-0 text-accent"></i>
-                    <h2 class="mt-4">CONTACT US</h2>
+                    <h2 class="mt-4 font-bold">CONTACT US</h2>
 
                     <div class="mt-5">
                         <p>Corso Panaro, 5</p>
@@ -287,7 +287,7 @@
             <div class="card text-center h-100">
                 <div class="card-body mb-4">
                     <i class="fa-regular fa-clock mt-4 mt-xl-0 text-accent"></i>
-                    <h2 class="mt-4 mb-5">WORKING DAYS</h2>
+                    <h2 class="mt-4 mb-5 font-bold">WORKING DAYS</h2>
 
                     @foreach(var day in Model.OpeningHours)
                     {
@@ -336,7 +336,7 @@
                         string whatsappUrl = "https://api.whatsapp.com/message/TBL5L4JXFTKWP1?autoload=1&app_absent=0&utm_source=ig";
                     }
                     <i class="fa-solid fa-users mt-4 mt-xl-0 text-accent"></i>
-                    <h2 class="mt-4">SOCIAL</h2>
+                    <h2 class="mt-4 font-bold">SOCIAL</h2>
 
                     <div class="mt-5 d-flex flex-column justify-content-end align-items-center">
                         <div class="mb-3">

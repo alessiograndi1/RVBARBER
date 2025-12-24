@@ -54,7 +54,7 @@
                                             <span class="d-block text-muted">@tratt.Descrizione</span>
                                         </div>
                                         <div class="text-nowrap">
-                                            @tratt.DurataMinuti <span class="small text-muted">min</span> / <span class="text-accent font-bold">@tratt.Prezzo.ToString("0.00") €</span>
+                                            @tratt.DurataMinuti <span class="small text-muted">min</span> / <span class="text-accent font-bold">@tratt.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</span>
                                         </div>
                                     </div>
                                 </a>

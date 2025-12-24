@@ -32,6 +32,23 @@ window.addEventListener('load', () => {
     }
 });
 
+// Back to top button
+const backToTopBtn = document.getElementById('backToTopBtn');
+window.addEventListener("scroll", function () {
+if (document.documentElement.scrollTop > 700) {
+    backToTopBtn.style.display = "block";
+} else {
+    backToTopBtn.style.display = "none";
+}
+});
+
+backToTopBtn.addEventListener("click", function () {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
+});
+
 // Menù mobile
 const navMobile = document.getElementById('navbar-mobile');
 const menu = document.getElementById('mobile-menu');

@@ -63,14 +63,10 @@
 
     <div class="row my-4">
         <div class="col-12">
-            <div class="card p-0" style="background-color: #8d6d4275;">
+            <div class="card p-0" style="background-color: #8a8a8a26;">
                 <div class="card-body p-4">
-                    <h4 class="mb-4"><i class="far fa-calendar-check text-accent"></i>&nbsp;&nbsp;Prenota un appuntamento</h4>
-                    
-                    <div class="d-flex flex-column">
-                        <p>Benvenuto nella sezione di prenotazione online di RVBARBER. Da qui puoi selezionare il tuo barbiere di fiducia, scegliere i trattamenti desiderati e fissare un appuntamento in base alla tua disponibilità.</p>
-                        <p>Segui i passaggi sottostanti per completare la tua prenotazione in modo semplice e veloce. Ti aspettiamo nel nostro salone per offrirti un'esperienza di grooming unica!</p>
-                    </div>
+                    <h4 class="mb-4"><i class="far fa-calendar-check text-accent"></i>&nbsp;&nbsp;Prenota il tuo appuntamento</h4>
+                    <p>Segui i passaggi sottostanti per completare la tua prenotazione in modo semplice e veloce. Ti aspettiamo nel nostro salone!</p>
                 </div>
             </div>
         </div>
@@ -102,7 +98,7 @@
     <div class="card my-4 mt-xl-5">
         <div class="card-body p-4 p-xl-0">
             <h4 class="font-bold"><i class="fas fa-cut text-accent"></i>&nbsp;&nbsp;SELEZIONA TRATTAMENTO</h4>
-            <h4 class="mt-5 mb-4">HAIR CARE</h4>
+            <h4 class="mt-5 mb-4 font-bold">HAIR CARE</h4>
             @foreach(var t in hairCare)
             {
                 <div class="d-flex align-items-center justify-content-between">
@@ -111,11 +107,11 @@
                         <p class="ms-3 mb-0">@t.NomeTrattamento</p>
                         <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
                     </div>
-                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
 
-            <h4 class="mt-5 mb-4">SHAVE</h4>
+            <h4 class="mt-5 mb-4 font-bold">SHAVE</h4>
             @foreach(var t in shave)
             {
                 <div class="d-flex align-items-center justify-content-between">
@@ -124,11 +120,11 @@
                         <p class="ms-3 mb-0">@t.NomeTrattamento</p>
                         <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
                     </div>
-                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
 
-            <h4 class="mt-5 mb-4">COMBO</h4>
+            <h4 class="mt-5 mb-4 font-bold">COMBO</h4>
             @foreach(var t in combo)
             {
                 <div class="d-flex align-items-center justify-content-between">
@@ -137,7 +133,7 @@
                         <p class="ms-3 mb-0">@t.NomeTrattamento</p>
                         <small class="d-none ms-3 mb-0 text-muted"> (@t.DurataMinuti min)</small>
                     </div>
-                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00") €</p>
+                    <p class="mb-0 text-accent font-bold">@t.Prezzo.ToString("0.00", new System.Globalization.CultureInfo("it-IT")) €</p>
                 </div>
             }
         </div>
@@ -157,7 +153,7 @@
     </div>
     
     <!-- Riepilogo prenotazione -->
-    <div class="card my-4 mt-xl-5" id="recap-trattamenti" style="display: none;">
+    <div class="card my-4 mt-xl-5" id="recap-trattamenti" style="display: none; background-color: #8a8a8a26">
         <div class="card-body p-4 p-xl-0">
             <h3 class="mb-4">Riepilogo:</h3>
             <div id="lista-trattamenti">
@@ -173,7 +169,7 @@
             <hr>
             <div class="d-flex align-items-center justify-content-between">
                 <h3 class="mb-0"><strong>Totale:</strong> <span id="totale-prezzo"></span></h3>
-                <button class="btn btn-outline-light" id="btn-prenota">Conferma</button>
+                <button class="btn btn-outline-light" id="btn-prenota"><i class="fa-regular fa-calendar-check"></i>&nbsp;&nbsp;Conferma</button>
             </div>
         </div>
     </div>
@@ -192,7 +188,7 @@
             const selectedName = selectBarber.value;
             resetPrenotazione(); 
             selectBarber.value = selectedName;
-            barbiereTrattamento.innerHTML = `<div>Barbiere: <span class="text-accent">${selectedName}</span></div>`;
+            barbiereTrattamento.innerHTML = `<div>Barbiere: <span class="text-accent font-bold">${selectedName}</span></div>`;
 
             controllaPrenotazioneValida();
         });
@@ -248,7 +244,7 @@
                 if (!isNaN(prezzoNumerico)) {
                     const badge = document.createElement('div');
                     badge.classList.add('badge', 'badge-accent', 'me-3', 'mb-3', 'ps-3', 'py-2');
-                    badge.textContent = `${descrizione} (${prezzoTesto})`;
+                    badge.innerHTML = `<i class="fas fa-cut me-3"></i>${descrizione} (${prezzoTesto})`;
 
                     const removeBtn = document.createElement('button');
                     removeBtn.classList.add('btn', 'btn-sm', 'ms-3', 'text-light');
@@ -311,6 +307,13 @@
         let selectedSlot = null;
 
         datePicker.addEventListener('change', async () => {
+            // Se non selezionato il barbiere
+            if(!selectBarber.value) {
+                slotContainer.innerHTML = '<div class="text-muted" onclick="#orario"> Seleziona barbiere mancante </div>'
+                controllaPrenotazioneValida();
+                return;
+            }
+
             let selectedDate = datePicker.value;
             
             slotContainer.innerHTML = '';
@@ -371,6 +374,7 @@
             });
 
             slotContainer.style.display = 'flex';
+            window.scrollTo({top: slotContainer.getBoundingClientRect().top + window.pageYOffset - 200})
         });
 
         // Prenotazione
@@ -465,8 +469,12 @@
 
             if (barbiereSelezionato && dataSelezionata && slotSelezionato) {
                 btnPrenota.classList.remove('disabled');
+                btnPrenota.classList.remove('btn-outline-light');
+                btnPrenota.classList.add('btn-success');
             } else {
                 btnPrenota.classList.add('disabled');
+                btnPrenota.classList.add('btn-outline-light');
+                btnPrenota.classList.remove('btn-success');
             }
         }
 
