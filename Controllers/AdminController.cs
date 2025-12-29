@@ -378,10 +378,10 @@ public class AdminController(ILogger<AccountController> logger, AppDbContext dbC
         Console.WriteLine("Ricevuto nuovo cliente: " + nuovoCliente.Name + " " + nuovoCliente.Surname + " " + nuovoCliente.Phone + " " + nuovoCliente.Email);
 
         await _dbContext.Users.AddAsync(new User {
-            Name = nuovoCliente.Name,
-            Surname = nuovoCliente.Surname,
-            Phone = nuovoCliente.Phone,
-            Email = nuovoCliente.Email,
+            Name = nuovoCliente.Name.Trim(),
+            Surname = nuovoCliente.Surname.Trim(),
+            Phone = nuovoCliente.Phone.Trim(),
+            Email = nuovoCliente.Email.Trim(),
             Username = string.Format($"{nuovoCliente.Name.ElementAt(0)}{nuovoCliente.Surname}").ToLower().ToString(),
             Role = "base",
             Password = "Temp123"

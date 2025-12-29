@@ -127,9 +127,9 @@
                 <button class="btn text-light py-0 px-2" onclick="previousDate()">
                     <i class="fas fa-angle-left"></i>
                 </button>
-                <div class="font-bold d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center justify-content-between">
                     <p class="mb-0">
-                        <span class="pe-3">@date.ToString("dddd", new System.Globalization.CultureInfo("it-IT")).ToUpper()</span>
+                        <span class="pe-1">@date.ToString("dddd", new System.Globalization.CultureInfo("it-IT")).ToUpper()</span>
                         <input type="date" id="datepicker" style="background-color: transparent; border: none; padding-right: 0" value="@date.ToString("yyyy-MM-dd")" onchange="goToDate(this.value)" />
                     </p>
                 </div>
