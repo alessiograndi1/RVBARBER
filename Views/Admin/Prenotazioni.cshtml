@@ -80,14 +80,14 @@
 
 <!-- Conferma elimina prenotazione -->
 <div class="modal fade" id="modal-delete-reservation">
-    <div class="modal-dialog">
+    <div class="modal-dialog p-5" style="padding-top: 8rem !important;">
         <div class="modal-content text-dark">
             <div class="modal-header p-2">
                 <button type="button" class="btn ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
             </div>
             <div class="px-4">
-                <form id="delete-reservation-form" data-url="@Url.Action("DeleteReservation", "Account")">
-                    <div class="mt-4">Confermi di voler annullare la prenotazione?</div>
+                <form id="delete-reservation-form">
+                    <div class="mt-4">Eliminare la prenotazione?</div>
                     <div class="text-end pb-3 mt-5">
                         <button type="submit" class="btn btn-danger mb-3 py-2">Elimina</button>
                         <button type="reset" class="btn btn-outline-dark mb-3 py-2" data-bs-dismiss="modal">Annulla</button>
@@ -110,7 +110,7 @@
                 event.preventDefault();
                 const submitBtn = formDelete.querySelector('button[type="submit"]');
                 submitBtn.setAttribute('disabled', '');
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mx-5" role="status" aria-hidden="true"></span>';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mx-3" role="status" aria-hidden="true"></span>';
                 $('#modal-delete-reservation').modal('hide');
 
                 const response = await fetch(`/reservations/${id}`, { method: 'DELETE' });
