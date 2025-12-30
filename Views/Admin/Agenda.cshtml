@@ -287,7 +287,7 @@
 </div>
 
 <!-- Conferma elimina prenotazione -->
-<div class="modal fade" id="modal-delete-reservation">
+<div class="modal fade" id="modal-delete-reservation" style="z-index: 1060;">
     <div class="modal-dialog p-5" style="padding-top: 8rem !important;">
         <div class="modal-content text-dark">
             <div class="modal-header p-2">
@@ -525,20 +525,12 @@
             }
         }
 
-        const modalStack = [];
-        document.addEventListener('shown.bs.modal', e => {
-            modalStack.push(e.target);
-            modalStack.forEach((modal, i) => {
-                modal.style.zIndex = 1050 + i * 20;
-            });
-
-            document.querySelectorAll('.modal-backdrop').forEach((bd, i) => {
-                bd.style.zIndex = 1040 + i * 20;
-            });
-        });
-
         async function elimina(id) {
             $('#modal-delete-reservation').modal('show');
+            setTimeout(() => {
+                document.querySelector('.modal-backdrop:last-child').style.zIndex = '1055';
+            }, 2);
+
             const formDelete = document.querySelector('#delete-reservation-form');
             formDelete.addEventListener('submit', async (event) => {
                 event.preventDefault();
